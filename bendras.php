@@ -1,9 +1,16 @@
 <?php
 include("db.php");
 
-$sql = "SELECT id, name, surname, phone, education, round(salary/100,0) as salary FROM employees";
+if (isset($_GET['action']) && $_GET['action'] == 'delete') {
+
+    $sql = "DELETE FROM employees WHERE id=?";
+    $pstm = $pdo->prepare($sql);
+    $pstm->execute([$_GET['id']]);
+}
+
+$sql = "SELECT employees .*, positions.name as positions_name  FROM employees LEFT JOIN positions ON employees.positions_id=positions.id";
 $pstm = $pdo->prepare($sql);
-$pstm->execute();
+$pstm->execute([]);
 $darbuotojai = $pstm->fetchAll(PDO::FETCH_ASSOC);
 
 $sql2 = "SELECT id, name, base_salary FROM positions";
@@ -33,14 +40,20 @@ $pareigos = $pstm2->fetchAll(PDO::FETCH_ASSOC);
         <div class="col-md-12">
 
             <div class="fs-3"><b>Darbuotojų sąrašas</b></div>
+            <div>
+                <a href="new.php" class="btn  btn-primary float-end mb-3">Pridėti naują darbuotoja</a>
+            </div>
             <table class="table mt-3 table-success  table-striped-columns">
                 <tr>
                     <th></th>
                     <th>Vardas</th>
                     <th>Pavardė</th>
-                    <th>Tel. nr.</th>
+                    <!--<th>Tel. nr.</th>
                     <th>Išsilavinimas</th>
-                    <th>Alga</th>
+                    <th>Alga</th>-->
+                    <th>Pareigos</th>
+                    <th></th>
+                    <th></th>
                     <th></th>
                 </tr>
                 <?php foreach ($darbuotojai as $darbuotojas) { ?>
@@ -48,10 +61,23 @@ $pareigos = $pstm2->fetchAll(PDO::FETCH_ASSOC);
                         <td><?= $darbuotojas['id'] ?></td>
                         <td><?= $darbuotojas['name'] ?></td>
                         <td><?= $darbuotojas['surname'] ?></td>
-                        <td><?= $darbuotojas['phone'] ?></td>
+                        <!-- <td><?= $darbuotojas['phone'] ?></td>
                         <td><?= $darbuotojas['education'] ?></td>
-                        <td><?= $darbuotojas['salary'] . ' ' . 'EUR' ?></td>
+                        <td>
+                            <?= $darbuotojas['salary'] / 100 . ' ' . 'EUR' ?>
+                        </td>-->
+                        <td><?= $darbuotojas['positions_name'] ?></td>
+
+                        <!--<td><?= $darbuotojas['projects_name'] ?></td>-->
+                        <td><a href="projects.php?id=<?= $darbuotojas['id'] ?>" class="btn btn-info">Pridėti projektą</a></td>
+
+
+
                         <td><a class="btn btn-success" href="asmeninis.php?id=<?= $darbuotojas['id'] ?>">Plačiau</a></td>
+                        <td>
+                            <a href="update.php?id=<?= $darbuotojas['id'] ?>" class="btn btn-info">Redaguoti</a>
+                            <a href="bendras.php?action=delete&id=<?= $darbuotojas['id'] ?>" class="btn btn-danger">Ištrinti</a>
+                        </td>
                     </tr>
                 <?php } ?>
             </table>
@@ -79,6 +105,7 @@ $pareigos = $pstm2->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?= $pozicija['name'] ?></td>
                                 <td><?= $pozicija['base_salary'] ?></td>
                                 <td><a href="#" class="btn btn-success">Rodyti darbuotojus</a></td>
+
                             </tr>
                         <?php } ?>
                     </table>
