@@ -13,10 +13,16 @@ $pstm = $pdo->prepare($sql);
 $pstm->execute([]);
 $darbuotojai = $pstm->fetchAll(PDO::FETCH_ASSOC);
 
-$sql2 = "SELECT id, name, base_salary FROM positions";
+$sql2 = "SELECT positions.name, positions.base_salary, COUNT(`positions_id`) as kiekis FROM employees e LEFT JOIN positions ON e.positions_id=positions.id GROUP BY positions.name";
 $pstm2 = $pdo->prepare($sql2);
-$pstm2->execute();
+$pstm2->execute([]);
 $pareigos = $pstm2->fetchAll(PDO::FETCH_ASSOC);
+
+$sql3 = "SELECT COUNT(id) as skaicius, AVG(`salary`) as vidutinis, MIN(`salary`) as maziausias, MAX(`salary`) as didziausias FROM `employees`";
+$pstm3 = $pdo->prepare($sql3);
+$pstm3->execute([]);
+$statistika = $pstm3->fetchAll(PDO::FETCH_ASSOC);
+
 
 ?>
 
@@ -68,7 +74,7 @@ $pareigos = $pstm2->fetchAll(PDO::FETCH_ASSOC);
                         </td>-->
                         <td><?= $darbuotojas['positions_name'] ?></td>
 
-                        <!--<td><?= $darbuotojas['projects_name'] ?></td>-->
+
                         <td><a href="projects.php?id=<?= $darbuotojas['id'] ?>" class="btn btn-info">Pridėti projektą</a></td>
 
 
@@ -94,17 +100,48 @@ $pareigos = $pstm2->fetchAll(PDO::FETCH_ASSOC);
 
                     <table class="table mt-3 table-success  table-striped-columns">
                         <tr>
-                            <th></th>
+
                             <th>Pareigos</th>
                             <th>Bazinis darbo užmokestis</th>
+                            <th>Darbuotojų skaicius</th>
                             <th></th>
                         </tr>
                         <?php foreach ($pareigos as $pozicija) { ?>
                             <tr>
-                                <td><?= $pozicija['id'] ?></td>
+
                                 <td><?= $pozicija['name'] ?></td>
                                 <td><?= $pozicija['base_salary'] ?></td>
+                                <td><?= $pozicija['kiekis'] ?></td>
                                 <td><a href="#" class="btn btn-success">Rodyti darbuotojus</a></td>
+
+                            </tr>
+                        <?php } ?>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="fs-3"><b>Imones statistika</b></div>
+
+                    <table class="table mt-3 table-success  table-striped-columns">
+                        <tr>
+
+                            <th>Imoneje dirbanciu zmoniu skaicius</th>
+                            <th>Vidutinis darbo uzmokestis</th>
+                            <th>Minimalus darbo uzmokestis</th>
+                            <th>Maksimalus darbo uzmokestis</th>
+                        </tr>
+                        <?php foreach ($statistika as $rezultatas) { ?>
+                            <tr>
+
+                                <td><?= $rezultatas['skaicius'] ?></td>
+                                <td><?= $rezultatas['vidutinis'] ?></td>
+                                <td><?= $rezultatas['maziausias'] ?></td>
+                                <td><?= $rezultatas['didziausias'] ?></td>
 
                             </tr>
                         <?php } ?>
